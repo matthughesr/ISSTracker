@@ -33,3 +33,26 @@ jobs:
           context: .
           push: true
           tags: ${{ steps.login-ecr.outputs.registry }}/iss_tracker:${{ github.sha }}
+
+
+      - name: Validate CloudFormation template
+        run: |
+          aws cloudformation validate-template --template-body file://.github/cloudformation/ecs-fargate-deployment.yaml
+        continue-on-error: false
+      
+      - name: Deploy CloudFormation stack
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: iss_tracker_stack
+          template: .github/cloudformation/ecs-fargate-deployment.yaml
+          tags: "[{\"Key\": \"cdci\",\"Value\":\"github\"}]"
+          capabilities: CAPABILITY_IAM
+          parameter-overrides: >-
+            ImageTag=${{ github.sha }}
+          no-fail-on-empty-changeset: "1"
+
+
+
+
+
+      
