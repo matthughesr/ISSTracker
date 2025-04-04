@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISS Tracker</title>
+    <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>International Space Station Tracker</h1>
+    </header>
+    
+    <main>
+        <section class="data-container">
+            <div class="iss-position">
+                <h2>Current Position</h2>
+                <div class="position-details">
+                    <p>Latitude: <span id="iss-lat">Loading...</span></p>
+                    <p>Longitude: <span id="iss-lng">Loading...</span></p>
+                    <p>Last updated: <span id="timestamp">-</span></p>
+                </div>
+            </div>
+            
+            <div class="iss-people">
+                <h2>People in Space</h2>
+                <p>Currently there are <span id="people-count">-</span> people in space.</p>
+                <ul id="people-list"></ul>
+            </div>
+        </section>
+        
+        <section class="map-container">
+            <div id="iss-map"></div>
+        </section>
+        
+        <section class="pass-times">
+            <h2>ISS Pass Times</h2>
+            <div class="location-input">
+                <input type="number" id="lat-input" placeholder="Latitude" step="0.001">
+                <input type="number" id="lng-input" placeholder="Longitude" step="0.001">
+                <button id="get-pass-times">Get Pass Times</button>
+                <button id="use-my-location">Use My Location</button>
+            </div>
+            <div id="pass-times-results"></div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>Data provided by <a href="http://open-notify.org/" target="_blank">Open Notify API</a></p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script src="js/iss-data.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
