@@ -65,7 +65,7 @@ Resources:
           Subnets:
             - Ref: MySubnet
           SecurityGroups:
-            - Ref: MySecurityGroup
+            - !GetAtt MySecurityGroup.GroupId
           AssignPublicIp: ENABLED
 
 
