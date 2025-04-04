@@ -1,136 +1,100 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Resources:
-  # VPC with Public Subnets
-  VPC:
-    Type: AWS::EC2::VPC
+  # Create a new ECS Cluster
+  MyCluster:
+    Type: AWS::ECS::Cluster
     Properties:
-      CidrBlock: 10.0.0.0/16
-      EnableDnsSupport: 'true'
-      EnableDnsHostnames: 'true'
-      Tags:
-        - Key: Name
-          Value: FargateVPC
+      ClusterName: MyFargateCluster
 
-  PublicSubnet1:
-    Type: AWS::EC2::Subnet
+  # Create a Task Definition for the container
+  MyTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
     Properties:
-      VpcId: !Ref VPC
-      CidrBlock: 10.0.1.0/24
-      AvailabilityZone: us-east-1a
-      MapPublicIpOnLaunch: 'true'
-      Tags:
-        - Key: Name
-          Value: PublicSubnet1
+      Family: MyTaskDefinitionFamily
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: '256'
+      Memory: '512'
+      ExecutionRoleArn: arn:aws:iam::525290056279:role/ecsTaskExecutionRole
+      ContainerDefinitions:
+        - Name: MyContainer
+          Image: 525290056279.dkr.ecr.us-east-1.amazonaws.com/iss_tracker:latest  # ECR Image URI
+          PortMappings:
+            - ContainerPort: 80
+              HostPort: 80
+              Protocol: tcp
 
-  PublicSubnet2:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      CidrBlock: 10.0.2.0/24
-      AvailabilityZone: us-east-1b
-      MapPublicIpOnLaunch: 'true'
-      Tags:
-        - Key: Name
-          Value: PublicSubnet2
-
-  # Internet Gateway for Public Access
-  InternetGateway:
-    Type: AWS::EC2::InternetGateway
-    Properties:
-      Tags:
-        - Key: Name
-          Value: FargateInternetGateway
-
-  AttachGateway:
-    Type: AWS::EC2::VPCGatewayAttachment
-    Properties:
-      VpcId: !Ref VPC
-      InternetGatewayId: !Ref InternetGateway
-
-  # Security Group for the Fargate Task
-  FargateSecurityGroup:
+  # Create a Security Group for the Fargate Task
+  MySecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Fargate Security Group
-      VpcId: !Ref VPC
+      GroupDescription: Allow HTTP traffic
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: '80'
           ToPort: '80'
-          CidrIp: '0.0.0.0/0'
+          CidrIp: 0.0.0.0/0
 
-  # ECS Cluster
-  ECSCluster:
-    Type: AWS::ECS::Cluster
+  # Create a VPC (optional if not using an existing VPC)
+  MyVPC:
+    Type: AWS::EC2::VPC
     Properties:
-      ClusterName: FargateCluster
+      CidrBlock: '10.0.0.0/16'
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
 
-  # # Load Balancer (Application Load Balancer)
-  # ALB:
-  #   Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-  #   Properties:
-  #     Name: FargateALB
-  #     Subnets:
-  #       - Ref: PublicSubnet1
-  #       - Ref: PublicSubnet2
-  #     SecurityGroups:
-  #       - Ref: FargateSecurityGroup
-  #     Scheme: internet-facing
-  #     LoadBalancerAttributes:
-  #       - Key: idle_timeout.timeout_seconds
-  #         Value: '60'
-  #     Type: application
-  #     SslPolicy: ELBSecurityPolicy-2016-08
-
-  # Target Group for Load Balancer
-  TargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  # Create a Subnet (optional if not using an existing subnet)
+  MySubnet:
+    Type: AWS::EC2::Subnet
     Properties:
-      Name: FargateTargetGroup
-      Port: '80'
-      Protocol: HTTP
-      VpcId: !Ref VPC
-      HealthCheckPath: '/'
-      Matcher:
-        HttpCode: '200'
+      AvailabilityZone: us-east-1a
+      CidrBlock: '10.0.0.0/24'
+      VpcId: !Ref MyVPC
 
- # ECS Task Definition with minimal CPU and memory settings
-  ECSTaskDefinition:
-    Type: AWS::ECS::TaskDefinition
-    Properties:
-      Family: FargateTaskDefinition
-      ExecutionRoleArn: arn:aws:iam::525290056279:role/ecsTaskExecutionRole #arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
-      Cpu: 256         # Minimum CPU
-      Memory: 512      # Minimum memory
-      ContainerDefinitions:
-        - Name: WebContainer
-          Image: '525290056279.dkr.ecr.us-east-1.amazonaws.com/iss_tracker'
-          PortMappings:
-            - ContainerPort: 80
-          Environment:
-            - Name: NODE_ENV
-              Value: production
-          LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-group: /ecs/FargateTask
-              awslogs-region: us-east-1
-              awslogs-stream-prefix: web
-
-  # ECS Service with DesiredCount set to 1
-  ECSService:
+  # Create a Fargate Service
+  MyFargateService:
     Type: AWS::ECS::Service
     Properties:
-      Cluster: !Ref ECSCluster
-      TaskDefinition: !Ref ECSTaskDefinition
-      DesiredCount: '1'  # Only 1 task running for cost minimization
+      Cluster: !Ref MyCluster
+      DesiredCount: 1
       LaunchType: FARGATE
+      TaskDefinition: !Ref MyTaskDefinition
       NetworkConfiguration:
         AwsvpcConfiguration:
           Subnets:
-            - Ref: PublicSubnet1
-            - Ref: PublicSubnet2
+            - Ref: MySubnet
           SecurityGroups:
-            - Ref: FargateSecurityGroup
+            - Ref: MySecurityGroup
           AssignPublicIp: ENABLED
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
