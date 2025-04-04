@@ -45,10 +45,8 @@ jobs:
         with:
           name: iss-tracker-stack
           template: .github/cloudformation/ecs-fargate-deployment.yaml
-          tags: "[{\"Key\": \"cdci\",\"Value\":\"github\"}]"
+          tags: "[{\"Key\": \"GitHubSHA\", \"Value\": \"${{ github.sha }}\"}]"
           capabilities: CAPABILITY_IAM
-          parameter-overrides: >-
-            ImageTag=${{ github.sha }}
           no-fail-on-empty-changeset: "1"
 
 
