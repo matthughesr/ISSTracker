@@ -150,8 +150,8 @@ Resources:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Family: FargateTaskDefinition
-      ExecutionRoleArn: arn:aws:iam::525290056279:role/ecsTaskExecutionRole
-      TaskRoleArn: arn:aws:iam::525290056279:role/ecsTaskRole
+      ExecutionRoleArn: arn:aws:iam::525290056279:role/ecsTaskExecutionRole 
+      TaskRoleArn: arn:aws:iam::525290056279:role/ecsTaskRole 
       Cpu: 256         # Minimum CPU
       Memory: 512      # Minimum memory
       NetworkMode: "awsvpc"  # Required for Fargate
@@ -159,7 +159,7 @@ Resources:
         - FARGATE
       ContainerDefinitions:
         - Name: WebContainer
-          Image: '123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo:latest'
+          Image: '525290056279.dkr.ecr.us-east-1.amazonaws.com/iss_tracker' #'123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo:latest'
           PortMappings:
             - ContainerPort: 80
           Environment:
