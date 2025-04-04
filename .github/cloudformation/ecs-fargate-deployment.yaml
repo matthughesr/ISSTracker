@@ -47,35 +47,6 @@ Resources:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref InternetGateway
 
-  # Public Route Table
-  PublicRouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: PublicRouteTable
-
-  PublicRoute:
-    Type: AWS::EC2::Route
-    DependsOn: AttachGateway
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway
-
-  PublicSubnet1RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref PublicSubnet1
-      RouteTableId: !Ref PublicRouteTable
-
-  PublicSubnet2RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref PublicSubnet2
-      RouteTableId: !Ref PublicRouteTable
-
   # Security Group for the Fargate Task
   FargateSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -88,78 +59,52 @@ Resources:
           ToPort: '80'
           CidrIp: '0.0.0.0/0'
 
-  # # Security Group for the Application Load Balancer
-  # ALBSecurityGroup:
-  #   Type: AWS::EC2::SecurityGroup
-  #   Properties:
-  #     GroupDescription: Security Group for ALB
-  #     VpcId: !Ref VPC
-  #     SecurityGroupIngress:
-  #       - IpProtocol: tcp
-  #         FromPort: '80'
-  #         ToPort: '80'
-  #         CidrIp: '0.0.0.0/0'
-
   # ECS Cluster
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
       ClusterName: FargateCluster
 
-  # # Application Load Balancer
-  # ApplicationLoadBalancer:
+  # # Load Balancer (Application Load Balancer)
+  # ALB:
   #   Type: AWS::ElasticLoadBalancingV2::LoadBalancer
   #   Properties:
   #     Name: FargateALB
+  #     Subnets:
+  #       - Ref: PublicSubnet1
+  #       - Ref: PublicSubnet2
+  #     SecurityGroups:
+  #       - Ref: FargateSecurityGroup
   #     Scheme: internet-facing
   #     LoadBalancerAttributes:
   #       - Key: idle_timeout.timeout_seconds
   #         Value: '60'
-  #     Subnets:
-  #       - !Ref PublicSubnet1
-  #       - !Ref PublicSubnet2
-  #     SecurityGroups:
-  #       - !Ref ALBSecurityGroup
+  #     Type: application
+  #     SslPolicy: ELBSecurityPolicy-2016-08
 
-  # # Target Group with the correct target type for Fargate
-  # TargetGroup:
-  #   Type: AWS::ElasticLoadBalancingV2::TargetGroup
-  #   Properties:
-  #     Name: FargateTargetGroup
-  #     Port: '80'
-  #     Protocol: HTTP
-  #     VpcId: !Ref VPC
-  #     TargetType: ip  # Fargate requires target type to be 'ip'
-  #     HealthCheckPath: '/'
-  #     Matcher:
-  #       HttpCode: '200'
+  # Target Group for Load Balancer
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: FargateTargetGroup
+      Port: '80'
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      HealthCheckPath: '/'
+      Matcher:
+        HttpCode: '200'
 
-  # # Listener for the Application Load Balancer
-  # ALBListener:
-  #   Type: AWS::ElasticLoadBalancingV2::Listener
-  #   Properties:
-  #     DefaultActions:
-  #       - Type: forward
-  #         TargetGroupArn: !Ref TargetGroup
-  #     LoadBalancerArn: !Ref ApplicationLoadBalancer
-  #     Port: '80'
-  #     Protocol: HTTP
-
-  # ECS Task Definition with minimal CPU and memory settings
+ # ECS Task Definition with minimal CPU and memory settings
   ECSTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Family: FargateTaskDefinition
-      ExecutionRoleArn: arn:aws:iam::525290056279:role/ecsTaskExecutionRole 
-      TaskRoleArn: arn:aws:iam::525290056279:role/ecsTaskRole 
+      ExecutionRoleArn: arn:aws:iam::525290056279:role/ecsTaskExecutionRole #arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
       Cpu: 256         # Minimum CPU
       Memory: 512      # Minimum memory
-      NetworkMode: "awsvpc"  # Required for Fargate
-      RequiresCompatibilities:
-        - FARGATE
       ContainerDefinitions:
         - Name: WebContainer
-          Image: '525290056279.dkr.ecr.us-east-1.amazonaws.com/iss_tracker' #'123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo:latest'
+          Image: '525290056279.dkr.ecr.us-east-1.amazonaws.com/iss_tracker'
           PortMappings:
             - ContainerPort: 80
           Environment:
@@ -175,7 +120,6 @@ Resources:
   # ECS Service with DesiredCount set to 1
   ECSService:
     Type: AWS::ECS::Service
-    DependsOn: ALBListener
     Properties:
       Cluster: !Ref ECSCluster
       TaskDefinition: !Ref ECSTaskDefinition
@@ -189,12 +133,4 @@ Resources:
           SecurityGroups:
             - Ref: FargateSecurityGroup
           AssignPublicIp: ENABLED
-#       LoadBalancers:
-#         - TargetGroupArn: !Ref TargetGroup
-#           ContainerName: WebContainer
-#           ContainerPort: 80
-
-# Outputs:
-#   LoadBalancerDNS:
-#     Description: DNS Name of the Application Load Balancer
-#     Value: !GetAtt ApplicationLoadBalancer.DNSName
+    
