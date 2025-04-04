@@ -30,6 +30,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Allow HTTP traffic
+      VpcId: !Ref MyVPC  # Reference to the VPC created above
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: '80'
