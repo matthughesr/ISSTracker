@@ -65,22 +65,22 @@ Resources:
     Properties:
       ClusterName: FargateCluster
 
-  # Load Balancer (Application Load Balancer)
-  ALB:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-    Properties:
-      Name: FargateALB
-      Subnets:
-        - Ref: PublicSubnet1
-        - Ref: PublicSubnet2
-      SecurityGroups:
-        - Ref: FargateSecurityGroup
-      Scheme: internet-facing
-      LoadBalancerAttributes:
-        - Key: idle_timeout.timeout_seconds
-          Value: '60'
-      Type: application
-      SslPolicy: ELBSecurityPolicy-2016-08
+  # # Load Balancer (Application Load Balancer)
+  # ALB:
+  #   Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+  #   Properties:
+  #     Name: FargateALB
+  #     Subnets:
+  #       - Ref: PublicSubnet1
+  #       - Ref: PublicSubnet2
+  #     SecurityGroups:
+  #       - Ref: FargateSecurityGroup
+  #     Scheme: internet-facing
+  #     LoadBalancerAttributes:
+  #       - Key: idle_timeout.timeout_seconds
+  #         Value: '60'
+  #     Type: application
+  #     SslPolicy: ELBSecurityPolicy-2016-08
 
   # Target Group for Load Balancer
   TargetGroup:
@@ -138,7 +138,7 @@ Resources:
           ContainerName: WebContainer
           ContainerPort: 80
 
-Outputs:
-  ALBURL:
-    Description: "URL of the Application Load Balancer"
-    Value: !GetAtt ALB.DNSName
+# Outputs:
+#   ALBURL:
+#     Description: "URL of the Application Load Balancer"
+#     Value: !GetAtt ALB.DNSName
