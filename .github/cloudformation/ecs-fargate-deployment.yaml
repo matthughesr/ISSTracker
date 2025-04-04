@@ -99,7 +99,7 @@ Resources:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Family: FargateTaskDefinition
-      ExecutionRoleArn: arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      ExecutionRoleArn: arn:aws:iam::525290056279:role/ecsTaskExecutionRole #arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
       Cpu: 256         # Minimum CPU
       Memory: 512      # Minimum memory
       ContainerDefinitions:
