@@ -43,7 +43,7 @@ jobs:
       - name: Deploy CloudFormation stack
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: iss_tracker_stack
+          name: iss-tracker-stack
           template: .github/cloudformation/ecs-fargate-deployment.yaml
           tags: "[{\"Key\": \"cdci\",\"Value\":\"github\"}]"
           capabilities: CAPABILITY_IAM
