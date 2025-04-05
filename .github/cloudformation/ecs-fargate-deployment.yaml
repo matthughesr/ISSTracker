@@ -19,7 +19,7 @@ Resources:
       ExecutionRoleArn: arn:aws:iam::525290056279:role/ecsTaskExecutionRole 
       ContainerDefinitions:
         - Name: MyContainer
-          Image: 525290056279.dkr.ecr.us-east-1.amazonaws.com/iss_tracker:${{ github.sha }}
+          Image: 525290056279.dkr.ecr.us-east-1.amazonaws.com/iss_tracker:latest  #${{ github.sha }}
           PortMappings:
             - ContainerPort: 80
               HostPort: 80

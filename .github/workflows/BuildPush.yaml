@@ -32,7 +32,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.login-ecr.outputs.registry }}/iss_tracker:${{ github.sha }}
+          tags: ${{ steps.login-ecr.outputs.registry }}/iss_tracker:latest  #${{ github.sha }}
 
 
       - name: Validate CloudFormation template
@@ -48,6 +48,10 @@ jobs:
           tags: "[{\"Key\": \"GitHubSHA\", \"Value\": \"${{ github.sha }}\"}]"
           capabilities: CAPABILITY_IAM
           no-fail-on-empty-changeset: "1"
+        
+      - name: Force ECS service update
+        run: |
+          aws ecs update-service --cluster MyFargateCluster --service MyFargateService --force-new-deployment
 
 
 
